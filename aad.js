@@ -7,8 +7,9 @@ var config = require('./config');
 var AuthenticationContext = require('adal-node').AuthenticationContext;
 var app = express();
 
-var templateAuthzUrl = 'https://login.microsoftonline.com/' + config.creds.tenant + '/oauth2/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>';
+var templateAuthzUrl = 'https://login.microsoftonline.com/' + config.creds.tenant + '/oauth2/authorize?response_type=code&client_id=<client_id>&redirect_uri=<redirect_uri>&state=<state>&resource=<resource>';
 var authorityUrl = config.creds.authorityHostUrl + '/' + config.creds.tenant;
+var resource = '00000002-0000-0000-c000-000000000000';
 
 app.use(cookieParser('a deep secret'));
 app.use(session({ secret: config.creds.clientSecret }));
@@ -35,6 +36,7 @@ function createAuthorizationUrl(state) {
     var authorizationUrl = templateAuthzUrl.replace('<client_id>', config.creds.clientID);
     authorizationUrl = authorizationUrl.replace('<redirect_uri>', config.creds.redirectUrl);
     authorizationUrl = authorizationUrl.replace('<state>', state);
+    authorizationUrl = authorizationUrl.replace('<resource>', resource);
     console.log(authorizationUrl);
     return authorizationUrl;
 }
@@ -44,32 +46,32 @@ function createAuthorizationUrl(state) {
 // user owned resource.
 app.get('/getrev', function (req, res) {
     res.send("Successfull !!");
-    // if (req.cookies.authstate !== req.query.state) {
-    //     res.send('error: state does not match');
-    //   }
-    //   var authenticationContext = new AuthenticationContext(authorityUrl);
-    //   authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, config.creds.redirectUrl, "", config.creds.clientId, config.creds.clientSecret, function(err, response) {
-    //     var message = '';
-    //     if (err) {
-    //       message = 'error: ' + err.message + '\n';
-    //     }
-    //     message += 'response: ' + JSON.stringify(response);
+    if (req.cookies.authstate !== req.query.state) {
+        res.send('error: state does not match');
+      }
+      var authenticationContext = new AuthenticationContext(authorityUrl);
+      authenticationContext.acquireTokenWithAuthorizationCode(req.query.code, config.creds.redirectUrl, resource, config.creds.clientID, config.creds.clientSecret, function(err, response) {
+        var message = '';
+        if (err) {
+          message = 'error: ' + err.message + '\n';
+        }
+        message += 'response: ' + JSON.stringify(response);
     
-    //     if (err) {
-    //       res.send(message);
-    //       return;
-    //     }
+        if (err) {
+          res.send(message);
+          return;
+        }
     
-    //     // Later, if the access token is expired it can be refreshed.
-    //     authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, sampleParameters.clientId, sampleParameters.clientSecret, resource, function(refreshErr, refreshResponse) {
-    //       if (refreshErr) {
-    //         message += 'refreshError: ' + refreshErr.message + '\n';
-    //       }
-    //       message += 'refreshResponse: ' + JSON.stringify(refreshResponse);
+        // Later, if the access token is expired it can be refreshed.
+        authenticationContext.acquireTokenWithRefreshToken(response.refreshToken, config.creds.clientID, config.creds.clientSecret, resource, function(refreshErr, refreshResponse) {
+          if (refreshErr) {
+            message += 'refreshError: ' + refreshErr.message + '\n';
+          }
+          message += 'refreshResponse: ' + JSON.stringify(refreshResponse);
     
-    //       res.send("Successfull !!"); 
-    //     }); 
-    //   });
+          res.send("Successfull !!"); 
+        }); 
+      });
 });
 
 app.listen(3000);
