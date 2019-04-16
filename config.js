@@ -9,8 +9,8 @@ exports.creds = {
     // To use the common endpoint, you have to either set `validateIssuer` to false, or provide the `issuer` value.
   
     // Required, the client ID of your app in AAD
-    clientID: 'd30bd073-da9d-4987-a03d-b8bf5e321867',
-    tenant : 'e9e4edba-b279-4419-b2c5-dc4a5767cf5e',
+    clientID: '<client-id>',
+    tenant : '<tenant>',
     authorityHostUrl : 'https://login.microsoftonline.com',
   
     // Required, must be 'code', 'code id_token', 'id_token code' or 'id_token'
@@ -27,7 +27,7 @@ exports.creds = {
   
     // Required if `responseType` is 'code', 'id_token code' or 'code id_token'.
     // If app key contains '\', replace it with '\\'.
-    clientSecret: '3m6URIKK+dOtFjqi9JLGbEeUJZqSO/hDQH1Juq8cxyE=',
+    clientSecret: '<secret>',
   
     // Required to set to false if you don't want to validate issuer
     validateIssuer: true,
